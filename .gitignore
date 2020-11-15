@@ -1,0 +1,6 @@
+/data/membrane/test/*.png
+/data/membrane/*.tif
+/data/membrane/train/aug/*.png
+/data/membrane/train/image/*.png
+/data/membrane/train/label/*.png
+/.idea
