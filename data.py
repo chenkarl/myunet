@@ -9,13 +9,15 @@ import PIL.Image as Image
 class LiverDataset(data.Dataset):
     # 创建LiverDataset类的实例时，就是在调用init初始化
     def __init__(self, root, transform=None, target_transform=None):  # root表示图片路径
-        n = len(os.listdir(root)) // 2  # os.listdir(path)返回指定路径下的文件和文件夹列表。/是真除法,//对结果取整
-
+        imgPath = os.path.join(root, "image")
+        labelPath = os.path.join(root, "label")
+        n = len(os.listdir(imgPath))  # os.listdir(path)返回指定路径下的文件和文件夹列表。/是真除法,//对结果取整
         imgs = []
         for i in range(n):
-            img = os.path.join(root, "%03d.png" % i)  # os.path.join(path1[,path2[,......]]):将多个路径组合后返回
-            mask = os.path.join(root, "%03d_mask.png" % i)
+            img = os.path.join(imgPath, "%d.png" % i)  # os.path.join(path1[,path2[,......]]):将多个路径组合后返回
+            mask = os.path.join(labelPath, "%d.png" % i)
             imgs.append([img, mask])  # append只能有一个参数，加上[]变成一个list
+        print('dataset have loaded')
 
         self.imgs = imgs
         self.transform = transform

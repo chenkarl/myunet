@@ -5,6 +5,8 @@ import unet
 from torch import optim
 from data import LiverDataset
 from torch.utils.data import DataLoader
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 # 是否使用current cuda device or torch.device('cuda:0')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -12,7 +14,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 x_transform = T.Compose([
     T.ToTensor(),
     # 标准化至[-1,1],规定均值和标准差
-    T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])  # torchvision.transforms.Normalize(mean, std, inplace=False)
+    T.Normalize([0.5], [0.5])  # torchvision.transforms.Normalize(mean, std, inplace=False)
 ])
 # mask只需要转换为tensor
 y_transform = T.ToTensor()
@@ -43,14 +45,14 @@ def train_model(model, criterion, optimizer, dataload, num_epochs=20):
 
 # 训练模型
 def train():
-    model = unet.UNet(3, 1).to(device)
+    model = unet.UNet(1, 1).to(device)
     batch_size = args.batch_size
     # 损失函数
     criterion = torch.nn.BCELoss()
     # 梯度下降
     optimizer = optim.Adam(model.parameters())  # model.parameters():Returns an iterator over module parameters
     # 加载数据集
-    liver_dataset = LiverDataset("data/train", transform=x_transform, target_transform=y_transform)
+    liver_dataset = LiverDataset("data/train/", transform=x_transform, target_transform=y_transform)
     dataloader = DataLoader(liver_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
     # DataLoader:该接口主要用来将自定义的数据读取接口的输出或者PyTorch已有的数据读取接口的输入按照batch size封装成Tensor
     # batch_size：how many samples per minibatch to load，这里为4，数据集大小400，所以一共有100个minibatch
@@ -61,9 +63,9 @@ def train():
 
 # 测试
 def test():
-    model = unet.UNet(3, 1)
+    model = unet.UNet(1, 1)
     model.load_state_dict(torch.load(args.weight, map_location='cpu'))
-    liver_dataset = LiverDataset("data/val", transform=x_transform, target_transform=y_transform)
+    liver_dataset = LiverDataset("data/test/", transform=x_transform, target_transform=y_transform)
     dataloaders = DataLoader(liver_dataset)  # batch_size默认为1
     model.eval()
     import matplotlib.pyplot as plt
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     # 参数解析
     parser = argparse.ArgumentParser()  # 创建一个ArgumentParser对象
     parser.add_argument('action', type=str, help='train or test')  # 添加参数
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--weight', type=str, help='the path of the mode weight file')
     args = parser.parse_args()
 
